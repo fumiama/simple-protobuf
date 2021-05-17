@@ -19,9 +19,14 @@ static uint64_t read_num(FILE* fp) {
 static int write_num(FILE* fp, uint64_t n) {
     char* c = (char*)(&n);
     int i = 0;
-    while(*c) {
-        int ch = *c & 0x7f;
-        if(c[1]) ch |= 0x80;
+    while(n > 0) {
+        #ifdef WORDS_BIGENDIAN
+            int ch = c[7] & 0x7f;
+            if(c[6]) ch |= 0x80;
+        #else
+            int ch = *c & 0x7f;
+            if(c[1]) ch |= 0x80;
+        #endif
         fputc(ch, fp);
         n >>= 7;
         i++;
