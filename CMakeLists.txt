@@ -8,5 +8,5 @@ if (${isBigEndian})
 endif()
 
 add_library(spb SHARED protobuf.c)
-add_executable(test test.c)
-target_link_libraries(test spb)
+add_executable(t test.c)
+target_link_libraries(t spb)
