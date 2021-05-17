@@ -22,11 +22,10 @@ static int write_num(FILE* fp, uint64_t n) {
     while(n > 0) {
         #ifdef WORDS_BIGENDIAN
             int ch = c[7] & 0x7f;
-            if(c[6]) ch |= 0x80;
         #else
             int ch = *c & 0x7f;
-            if(c[1]) ch |= 0x80;
         #endif
+        if((n >> 7) > 0) ch |= 0x80;
         fputc(ch, fp);
         n >>= 7;
         i++;
@@ -66,6 +65,9 @@ int set_pb(FILE* fp, uint8_t* items_type, uint64_t struct_len, void* target) {
     uint32_t i = 0;
     char* p = (char*)target;
     write_num(fp, struct_len);
+    #ifdef DEBUG
+        printf("struct_len: %llu bytes.\n", struct_len);
+    #endif
     while(offset < struct_len) {
         uint8_t type = items_type[i++];
         uint64_t data_len = 1u << type;
