@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 struct SIMPLE_PB {
-    uint32_t len;
+    uint32_t struct_len, real_len;
     char target[];
 };
 typedef struct SIMPLE_PB SIMPLE_PB;
