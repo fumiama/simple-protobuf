@@ -11,26 +11,20 @@ struct TEST {
 };
 
 struct TEST t;
-uint64_t items_len[5] = {sizeof(t.a), sizeof(t.b), sizeof(t.c), sizeof(t.d), sizeof(t.e)};
-uint8_t types_len[5];
 
 int main() {
     t.a = 0xAB;
-    t.b = 63345;
-    t.c = 1234567890;
-    t.d = 1234567898765435432ULL;
+    t.b = 0xCDEF;
+    t.c = 0xCCDDEE;
+    t.d = 0xABCDEF12345678;
     strcpy(t.e, "Hello world! This is a message from simple protobuf.");
+    uint64_t* items_len = align_struct(sizeof(struct TEST), 5, &t.a, &t.b, &t.c, &t.d, &t.e);
     for(int i = 0; i < 5; i++) {
-        types_len[i] = first_set(items_len[i]);
-        printf("Item %d has type %d with size %llu\n", i, types_len[i], items_len[i]);
-    }
-    align_struct(types_len, 5, sizeof(struct TEST));
-    for(int i = 0; i < 5; i++) {
-        printf("Item %d's type after align: %u\n", i, types_len[i]);
+        printf("Item %d has aligned size %llu\n", i, items_len[i]);
     }
     FILE* fp = fopen("test.sp", "wb");
     if(fp) {
-        set_pb(fp, types_len, sizeof(struct TEST), &t);
+        set_pb(fp, items_len, sizeof(struct TEST), &t);
         memset(&t, 0, sizeof(struct TEST));
         fclose(fp);
         puts("Write file succeed.");

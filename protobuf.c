@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include "simple_protobuf.h"
 
 //#define DEBUG
@@ -46,7 +47,7 @@ SIMPLE_PB* get_pb(FILE* fp) {
             char* end = p + struct_len;
             memset(p, 0, struct_len);
             while(p < end) {
-                uint64_t offset = 1u << fgetc(fp);
+                uint64_t offset = read_num(fp);
                 uint64_t data_len = read_num(fp);
                 #ifdef DEBUG
                     printf("Offset: %llu, data_len: %llu.\n", offset, data_len);
@@ -60,7 +61,7 @@ SIMPLE_PB* get_pb(FILE* fp) {
     return NULL;
 }
 
-int set_pb(FILE* fp, uint8_t* items_type, uint64_t struct_len, void* target) {
+int set_pb(FILE* fp, uint64_t* items_len, uint64_t struct_len, void* target) {
     uint64_t offset = 0;
     uint32_t i = 0;
     char* p = (char*)target;
@@ -69,9 +70,8 @@ int set_pb(FILE* fp, uint8_t* items_type, uint64_t struct_len, void* target) {
         printf("struct_len: %llu bytes.\n", struct_len);
     #endif
     while(offset < struct_len) {
-        uint8_t type = items_type[i++];
-        uint64_t data_len = 1u << type;
-        fputc(type, fp);
+        uint64_t data_len = items_len[i++];
+        write_num(fp, data_len);
         char* this = p + offset;
         offset += data_len;
         if(data_len > 1) while(!this[data_len - 1]) data_len--;
@@ -90,20 +90,22 @@ uint8_t first_set(uint64_t n) {
     return i;
 }
 
-void align_struct(uint8_t* items_type, uint64_t items_cnt, uint64_t struct_size) {
-    uint64_t sum = 0;
-    uint8_t min = 255;
-    for(uint64_t i = 0; i < items_cnt; i++) {
-        sum += 1u << items_type[i];
-        if(min > items_type[i]) min = items_type[i];
-    }
-    while(sum < struct_size) {
-        uint8_t new_min = 255;
-        sum = 0;
-        for(uint64_t i = 0; i < items_cnt; i++) {
-            if(items_type[i] == min) items_type[i]++;
-            if(new_min > items_type[i]) new_min = items_type[i];
-            sum += 1u << items_type[i];
+//uint64_t struct_size, uint32_t items_cnt, void* item_addr1, void* item_addr2...
+uint64_t* align_struct(uint64_t struct_size, uint32_t items_cnt, ...) {
+    va_list list;
+    va_start(list, items_cnt);
+    uint64_t* items_len = malloc(struct_size*sizeof(uint64_t));
+    if(items_len) {
+        void* this;
+        void* next = va_arg(list, void*);
+        void* end = next + struct_size;
+        for(uint32_t i = 0; i < items_cnt - 1; i++) {
+            this = next;
+            next = va_arg(list, void*);
+            items_len[i] = next - this;
         }
+        items_len[items_cnt-1] = end - next;
     }
+    va_end(list);
+    return items_len;
 }
