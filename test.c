@@ -18,9 +18,9 @@ int main() {
     t.c = 0xCCDDEE;
     t.d = 0xABCDEF12345678;
     strcpy(t.e, "Hello world! This is a message from simple protobuf.");
-    uint64_t* items_len = align_struct(sizeof(struct TEST), 5, &t.a, &t.b, &t.c, &t.d, &t.e);
+    uint32_t* items_len = align_struct(sizeof(struct TEST), 5, &t.a, &t.b, &t.c, &t.d, &t.e);
     for(int i = 0; i < 5; i++) {
-        printf("Item %d has aligned size %llu\n", i, items_len[i]);
+        printf("Item %d has aligned size %u\n", i, items_len[i]);
     }
     FILE* fp = fopen("test.sp", "wb");
     if(fp) {

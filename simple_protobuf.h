@@ -4,14 +4,14 @@
 #include <stdint.h>
 
 struct SIMPLE_PB {
-    uint64_t len;
+    uint32_t len;
     char target[];
 };
 typedef struct SIMPLE_PB SIMPLE_PB;
 
 SIMPLE_PB* get_pb(FILE* fp);
-int set_pb(FILE* fp, uint64_t* items_len, uint64_t struct_len, void* target);
-//uint64_t struct_size, uint32_t items_cnt, void* item_addr1, void* item_addr2...
-uint64_t* align_struct(uint64_t struct_size, uint32_t items_cnt, ...);
+int set_pb(FILE* fp, uint32_t* items_len, uint32_t struct_len, void* target);
+//uint32_t struct_size, uint32_t items_cnt, void* item_addr1, void* item_addr2...
+uint32_t* align_struct(uint32_t struct_size, uint32_t items_cnt, ...);
 
 #endif

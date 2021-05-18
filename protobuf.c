@@ -6,9 +6,9 @@
 
 //#define DEBUG
 
-static uint64_t read_num(FILE* fp) {
+static uint32_t read_num(FILE* fp) {
     uint8_t c;
-    uint64_t n = 0;
+    uint32_t n = 0;
     uint8_t i = 0;
     do {
         c = fgetc(fp);
@@ -17,12 +17,12 @@ static uint64_t read_num(FILE* fp) {
     return n;
 }
 
-static int write_num(FILE* fp, uint64_t n) {
+static int write_num(FILE* fp, uint32_t n) {
     char* c = (char*)(&n);
     int i = 0;
     while(n > 0) {
         #ifdef WORDS_BIGENDIAN
-            int ch = c[7] & 0x7f;
+            int ch = c[3] & 0x7f;
         #else
             int ch = *c & 0x7f;
         #endif
@@ -35,11 +35,11 @@ static int write_num(FILE* fp, uint64_t n) {
 }
 
 SIMPLE_PB* get_pb(FILE* fp) {
-    uint64_t struct_len = read_num(fp);
+    uint32_t struct_len = read_num(fp);
     if(struct_len > 1) {
-        SIMPLE_PB* spb = malloc(struct_len + sizeof(uint64_t));
+        SIMPLE_PB* spb = malloc(struct_len + sizeof(uint32_t));
         #ifdef DEBUG
-            printf("Malloc %llu + %lu bytes.\n", struct_len, sizeof(uint64_t));
+            printf("Malloc %llu + %lu bytes.\n", struct_len, sizeof(uint32_t));
         #endif
         if(spb) {
             spb->len = struct_len;
@@ -47,8 +47,8 @@ SIMPLE_PB* get_pb(FILE* fp) {
             char* end = p + struct_len;
             memset(p, 0, struct_len);
             while(p < end) {
-                uint64_t offset = read_num(fp);
-                uint64_t data_len = read_num(fp);
+                uint32_t offset = read_num(fp);
+                uint32_t data_len = read_num(fp);
                 #ifdef DEBUG
                     printf("Offset: %llu, data_len: %llu.\n", offset, data_len);
                 #endif
@@ -61,8 +61,8 @@ SIMPLE_PB* get_pb(FILE* fp) {
     return NULL;
 }
 
-int set_pb(FILE* fp, uint64_t* items_len, uint64_t struct_len, void* target) {
-    uint64_t offset = 0;
+int set_pb(FILE* fp, uint32_t* items_len, uint32_t struct_len, void* target) {
+    uint32_t offset = 0;
     uint32_t i = 0;
     char* p = (char*)target;
     write_num(fp, struct_len);
@@ -70,7 +70,7 @@ int set_pb(FILE* fp, uint64_t* items_len, uint64_t struct_len, void* target) {
         printf("struct_len: %llu bytes.\n", struct_len);
     #endif
     while(offset < struct_len) {
-        uint64_t data_len = items_len[i++];
+        uint32_t data_len = items_len[i++];
         write_num(fp, data_len);
         char* this = p + offset;
         offset += data_len;
@@ -81,11 +81,11 @@ int set_pb(FILE* fp, uint64_t* items_len, uint64_t struct_len, void* target) {
     return i;
 }
 
-//uint64_t struct_size, uint32_t items_cnt, void* item_addr1, void* item_addr2...
-uint64_t* align_struct(uint64_t struct_size, uint32_t items_cnt, ...) {
+//uint32_t struct_size, uint32_t items_cnt, void* item_addr1, void* item_addr2...
+uint32_t* align_struct(uint32_t struct_size, uint32_t items_cnt, ...) {
     va_list list;
     va_start(list, items_cnt);
-    uint64_t* items_len = malloc(struct_size*sizeof(uint64_t));
+    uint32_t* items_len = malloc(struct_size*sizeof(uint32_t));
     if(items_len) {
         void* this;
         void* next = va_arg(list, void*);
