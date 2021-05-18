@@ -4,8 +4,6 @@
 #include <stdarg.h>
 #include "simple_protobuf.h"
 
-//#define DEBUG
-
 static uint32_t read_num(FILE* fp) {
     uint8_t c;
     uint32_t n = 0;
@@ -38,9 +36,6 @@ SIMPLE_PB* get_pb(FILE* fp) {
     uint32_t struct_len = read_num(fp);
     if(struct_len > 1) {
         SIMPLE_PB* spb = malloc(struct_len + sizeof(uint32_t));
-        #ifdef DEBUG
-            printf("Malloc %llu + %lu bytes.\n", struct_len, sizeof(uint32_t));
-        #endif
         if(spb) {
             spb->len = struct_len;
             char* p = spb->target;
@@ -49,9 +44,6 @@ SIMPLE_PB* get_pb(FILE* fp) {
             while(p < end) {
                 uint32_t offset = read_num(fp);
                 uint32_t data_len = read_num(fp);
-                #ifdef DEBUG
-                    printf("Offset: %llu, data_len: %llu.\n", offset, data_len);
-                #endif
                 fread(p, data_len, 1, fp);
                 p += offset;
             }
@@ -66,9 +58,6 @@ int set_pb(FILE* fp, uint32_t* items_len, uint32_t struct_len, void* target) {
     uint32_t i = 0;
     char* p = (char*)target;
     write_num(fp, struct_len);
-    #ifdef DEBUG
-        printf("struct_len: %llu bytes.\n", struct_len);
-    #endif
     while(offset < struct_len) {
         uint32_t data_len = items_len[i++];
         write_num(fp, data_len);
