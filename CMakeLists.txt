@@ -12,4 +12,4 @@ add_executable(t test.c)
 target_link_libraries(t spb)
 
 INSTALL(TARGETS spb LIBRARY DESTINATION lib)
-INSTALL(TARGETS spb PUBLIC_HEADER DESTINATION include)
+INSTALL(FILES simple_protobuf.h DESTINATION include)
