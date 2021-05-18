@@ -8,8 +8,10 @@ if (${isBigEndian})
 endif()
 
 add_library(spb SHARED protobuf.c)
+add_library(spb_static STATIC protobuf.c)
 add_executable(t test.c)
 target_link_libraries(t spb)
 
 INSTALL(TARGETS spb LIBRARY DESTINATION lib)
+INSTALL(TARGETS spb_static ARCHIVE DESTINATION lib)
 INSTALL(FILES simple_protobuf.h DESTINATION include)
