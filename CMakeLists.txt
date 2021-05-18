@@ -9,6 +9,7 @@ endif()
 
 add_library(spb SHARED protobuf.c)
 add_library(spb_static STATIC protobuf.c)
+set_target_properties(spb_static PROPERTIES OUTPUT_NAME spb)
 add_executable(t test.c)
 target_link_libraries(t spb)
 
