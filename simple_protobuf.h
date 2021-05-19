@@ -1,6 +1,7 @@
 #ifndef _SIMPLE_PROTOBUF_H_
 #define _SIMPLE_PROTOBUF_H_
 
+#include <stdio.h>
 #include <stdint.h>
 
 struct SIMPLE_PB {

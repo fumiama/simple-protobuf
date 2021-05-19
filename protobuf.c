@@ -1,7 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include "simple_protobuf.h"
 
 static uint32_t read_num(FILE* fp) {
