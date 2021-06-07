@@ -46,7 +46,7 @@ SIMPLE_PB* get_pb(FILE* fp) {
             while(p < end) {
                 uint32_t offset = read_num(fp);
                 uint32_t data_len = read_num(fp);
-                fread(p, data_len, 1, fp);
+                if(data_len > 0) fread(p, data_len, 1, fp);
                 p += offset;
             }
             spb->real_len = ftell(fp) - init_pos;
@@ -66,9 +66,9 @@ int set_pb(FILE* fp, uint32_t* items_len, uint32_t struct_len, void* target) {
         write_num(fp, data_len);
         char* this = p + offset;
         offset += data_len;
-        if(data_len > 1) while(!this[data_len - 1]) data_len--;
+        if(data_len > 1) while(data_len > 0 && !this[data_len - 1]) data_len--;
         write_num(fp, data_len);
-        fwrite(this, data_len, 1, fp);
+        if(data_len > 0) fwrite(this, data_len, 1, fp);
     }
     return i;
 }
