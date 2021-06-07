@@ -47,7 +47,6 @@ SIMPLE_PB* get_pb(FILE* fp) {
             while(p < end) {
                 uint32_t offset = read_num(fp);
                 uint32_t data_len = read_num(fp);
-                printf("offset: %u, datlen: %u\n", offset, data_len);
                 if(data_len > 0) fread(p, data_len, 1, fp);
                 p += offset;
             }
