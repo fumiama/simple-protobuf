@@ -8,6 +8,12 @@ if (${isBigEndian})
     add_definitions(-DWORDS_BIGENDIAN)
 endif()
 
+#判断编译器类型,如果是gcc编译器,则在编译选项中加入c99支持
+if(CMAKE_COMPILER_IS_GNUCXX)
+    add_compile_options(-std=c99)
+    message(STATUS "optional:-std=c99")   
+endif(CMAKE_COMPILER_IS_GNUCXX)
+
 add_library(spb SHARED protobuf.c)
 add_library(spb_static STATIC protobuf.c)
 set_target_properties(spb_static PROPERTIES OUTPUT_NAME spb)
