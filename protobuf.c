@@ -37,7 +37,7 @@ SIMPLE_PB* get_pb(FILE* fp) {
     uint32_t init_pos = ftell(fp);
     uint32_t struct_len = read_num(fp);
     if(struct_len > 1) {
-        SIMPLE_PB* spb = malloc(struct_len + sizeof(uint32_t));
+        SIMPLE_PB* spb = malloc(struct_len + 2 * sizeof(uint32_t));
         if(spb) {
             spb->struct_len = struct_len;
             spb->real_len = 0;
