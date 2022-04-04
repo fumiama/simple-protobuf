@@ -36,7 +36,7 @@ static int write_num(FILE* fp, uint32_t n) {
 SIMPLE_PB* get_pb(FILE* fp) {
     uint32_t init_pos = ftell(fp);
     uint32_t struct_len = read_num(fp);
-    if(struct_len <= 1) return NULL;
+    if(struct_len <= 1 || struct_len >= 1u<<20) return NULL; // 1B<struct_len<1MB
     SIMPLE_PB* spb = malloc(struct_len + 2 * sizeof(uint32_t));
     if(!spb) return NULL;
     spb->struct_len = struct_len;
@@ -45,7 +45,7 @@ SIMPLE_PB* get_pb(FILE* fp) {
     for(char* p = spb->target; p < spb->target+struct_len; p += offset) {
         offset = read_num(fp);
         data_len = read_num(fp);
-        if(data_len > 0) fread(p, data_len, 1, fp);
+        if(data_len > 0 && data_len <= offset) fread(p, data_len, 1, fp);
     }
     spb->real_len = ftell(fp) - init_pos;
     return spb;
