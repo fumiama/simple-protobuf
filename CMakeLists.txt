@@ -8,6 +8,10 @@ if (${isBigEndian})
     add_definitions(-DWORDS_BIGENDIAN)
 endif()
 
+#在编译选项中加入c99支持
+add_compile_options(-std=c99)
+message(STATUS "optional:-std=c99")   
+
 add_library(spb SHARED protobuf.c)
 add_library(spb_static STATIC protobuf.c)
 set_target_properties(spb_static PROPERTIES OUTPUT_NAME spb)
