@@ -36,25 +36,19 @@ static int write_num(FILE* fp, uint32_t n) {
 SIMPLE_PB* get_pb(FILE* fp) {
     uint32_t init_pos = ftell(fp);
     uint32_t struct_len = read_num(fp);
-    if(struct_len > 1) {
-        SIMPLE_PB* spb = malloc(struct_len + 2 * sizeof(uint32_t));
-        if(spb) {
-            spb->struct_len = struct_len;
-            spb->real_len = 0;
-            char* p = spb->target;
-            char* end = p + struct_len;
-            memset(p, 0, struct_len);
-            while(p < end) {
-                uint32_t offset = read_num(fp);
-                uint32_t data_len = read_num(fp);
-                if(data_len > 0) fread(p, data_len, 1, fp);
-                p += offset;
-            }
-            spb->real_len = ftell(fp) - init_pos;
-            return spb;
-        }
+    if(struct_len <= 1) return NULL;
+    SIMPLE_PB* spb = malloc(struct_len + 2 * sizeof(uint32_t));
+    if(!spb) return NULL;
+    spb->struct_len = struct_len;
+    memset(spb->target, 0, struct_len);
+    uint32_t offset, data_len;
+    for(char* p = spb->target; p < spb->target+struct_len; p += offset) {
+        offset = read_num(fp);
+        data_len = read_num(fp);
+        if(data_len > 0) fread(p, data_len, 1, fp);
     }
-    return NULL;
+    spb->real_len = ftell(fp) - init_pos;
+    return spb;
 }
 
 int set_pb(FILE* fp, uint32_t* items_len, uint32_t struct_len, void* target) {
