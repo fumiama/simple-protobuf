@@ -86,7 +86,7 @@ SIMPLE_PB* read_pb_into(FILE* fp, SIMPLE_PB* spb) {
     return spb;
 }
 
-int set_pb(FILE* fp, uint32_t* items_len, uint32_t struct_len, void* target) {
+int set_pb(FILE* fp, const uint32_t* items_len, uint32_t struct_len, const void* target) {
     uint32_t offset = 0;
     uint32_t i = 0;
     char* p = (char*)target;
