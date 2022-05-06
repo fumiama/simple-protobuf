@@ -5,14 +5,25 @@
 #include "simple_protobuf.h"
 
 static uint32_t read_num(FILE* fp) {
-    uint8_t c;
-    uint32_t n = 0;
-    uint8_t i = 0;
+    uint32_t c, n = 0;
+    long i = 0;
     do {
         c = fgetc(fp);
         if(feof(fp)) return n;
         else n |= (c & 0x7f) << (7 * i++);
     } while((c & 0x80));
+    return n;
+}
+
+static uint32_t peek_num(FILE* fp) {
+    uint32_t c, n = 0;
+    long i = 0;
+    do {
+        c = fgetc(fp);
+        if(feof(fp)) return n;
+        else n |= (c & 0x7f) << (7 * i++);
+    } while((c & 0x80));
+    fseek(fp, -i, SEEK_CUR);
     return n;
 }
 
@@ -39,6 +50,30 @@ SIMPLE_PB* get_pb(FILE* fp) {
     if(struct_len <= 1 || struct_len >= 1u<<20) return NULL; // 1B<struct_len<1MB
     SIMPLE_PB* spb = malloc(struct_len + 2 * sizeof(uint32_t));
     if(!spb) return NULL;
+    spb->struct_len = struct_len;
+    memset(spb->target, 0, struct_len);
+    uint32_t offset, data_len;
+    for(char* p = spb->target; p < spb->target+struct_len; p += offset) {
+        offset = read_num(fp);
+        data_len = read_num(fp);
+        if(data_len > 0 && data_len <= offset) fread(p, data_len, 1, fp);
+    }
+    spb->real_len = ftell(fp) - init_pos;
+    return spb;
+}
+
+uint32_t get_pb_len(FILE* fp) {
+    uint32_t init_pos = ftell(fp);
+    uint32_t struct_len = peek_num(fp);
+    if(struct_len <= 1 || struct_len >= 1u<<20) return 0; // 1B<struct_len<1MB
+    return struct_len + 2*sizeof(uint32_t);
+}
+
+SIMPLE_PB* read_pb_into(FILE* fp, SIMPLE_PB* spb) {
+    if(!spb) return NULL;
+    uint32_t init_pos = ftell(fp);
+    uint32_t struct_len = read_num(fp);
+    if(struct_len <= 1 || struct_len >= 1u<<20) return NULL; // 1B<struct_len<1MB
     spb->struct_len = struct_len;
     memset(spb->target, 0, struct_len);
     uint32_t offset, data_len;
