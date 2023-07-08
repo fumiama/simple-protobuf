@@ -31,7 +31,7 @@ int main() {
         fp = NULL;
         fp = fopen("test.sp", "rb");
         if(fp) {
-            SIMPLE_PB* spb = get_pb(fp);
+            simple_pb_t* spb = get_pb(fp);
             memcpy(&t, spb->target, sizeof(struct TEST));
             printf("a:%u\nb:%u\nc:%u\nd:%llu\ne:%s\n", t.a, t.b, t.c, t.d, t.e);
             printf("Struct size: %u, read: %u\n", spb->struct_len, spb->real_len);
